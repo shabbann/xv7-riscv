@@ -123,8 +123,11 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
-  p->ctime=ticks;
-
+  if(p->pid%2==0){
+    p->priority=10;
+  }else{
+    p->priority=1;
+  }
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
     freeproc(p);
@@ -437,12 +440,12 @@ scheduler(void)
       acquire(&p->lock);
 
       if(p->state == RUNNABLE) {
-        if(best_p == 0 || p->ctime < best_p->ctime) {
+        if(best_p == 0 || p->priority < best_p->priority) {
           if(best_p != 0){
             release(&best_p->lock);
           }
-          best_p = p; // This is the new winner
-          continue;   // Skip the release() below. Keep holding lock on the winner
+          best_p = p;
+          continue; 
         }
       }
       release(&p->lock);

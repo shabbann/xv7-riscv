@@ -82,8 +82,8 @@ usertrap(void)
 
   // give up the CPU if this is a timer interrupt.
   //--------------
-  // if(which_dev == 2)
-  //   yield();
+  if(which_dev == 2)
+    yield();
 
   prepare_return();
 
@@ -151,10 +151,9 @@ kerneltrap()
     printf("scause=0x%lx sepc=0x%lx stval=0x%lx\n", scause, r_sepc(), r_stval());
     panic("kerneltrap");
   }
-//-------
   // // give up the CPU if this is a timer interrupt.
-  //  if(which_dev == 2 && myproc() != 0)
-  //    yield();
+   if(which_dev == 2 && myproc() != 0)
+     yield();
 
   // the yield() may have caused some traps to occur,
   // so restore trap registers for use by kernelvec.S's sepc instruction.
