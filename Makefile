@@ -144,6 +144,7 @@ UPROGS=\
 	$U/_forphan\
 	$U/_dorphan\
 	$U/_spin\
+	$U/_priority_test\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
