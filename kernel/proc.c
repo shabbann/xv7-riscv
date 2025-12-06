@@ -439,19 +439,19 @@ scheduler(void)
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
 
-      if(p->state == RUNNABLE) {
-        if(best_p == 0 || p->priority < best_p->priority) {
+      if(p->state == RUNNABLE) {//always pick the runnable state with the best pri
+        if(best_p == 0 || p->priority < best_p->priority) { 
           if(best_p != 0){
             release(&best_p->lock);
           }
           best_p = p;
-          continue; 
+          continue;  //don't release the lock of the best
         }
       }
       release(&p->lock);
     }
 
-    if(best_p != 0) {
+    if(best_p != 0) { // if best exist
       p = best_p;
         p->state = RUNNING;
         c->proc = p;
