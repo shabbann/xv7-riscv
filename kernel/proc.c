@@ -459,6 +459,10 @@ scheduler(void)
         c->proc = 0;
       release(&p->lock);
     }
+    else{
+      // nothing to run; stop running on this core until an interrupt.
+      asm volatile("wfi");
+    }
   }
 }
 
