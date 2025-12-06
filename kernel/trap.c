@@ -82,7 +82,7 @@ usertrap(void)
 
   // give up the CPU if this is a timer interrupt.
   //--------------
-  // if(which_dev == 2)
+   if(which_dev == 2){p->rtime++;}
   //   yield();
 
   prepare_return();
@@ -153,7 +153,9 @@ kerneltrap()
   }
 //-------
   // // give up the CPU if this is a timer interrupt.
-  //  if(which_dev == 2 && myproc() != 0)
+    if(which_dev == 2 && myproc() != 0){
+myproc()->rtime++;
+    }
   //    yield();
 
   // the yield() may have caused some traps to occur,
