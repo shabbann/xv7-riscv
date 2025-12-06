@@ -124,7 +124,8 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
-
+  p->ctime = ticks;
+  p->rtime = 0;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
     freeproc(p);
@@ -344,6 +345,19 @@ kexit(int status)
   iput(p->cwd);
   end_op();
   p->cwd = 0;
+  //BENCHMARKING-----------------
+uint64 tat = ticks - p->ctime;
+  uint64 wait_time = tat - p->rtime;
+  
+  if (p->pid > 2) { 
+      printf("PID %d | Algo: %d | Burst: %d | TAT: %d | Wait: %d\n", 
+             p->pid, 
+             p->priority, // or 0 if on FCFS branch
+             p->rtime, 
+             tat, 
+             wait_time);
+  }
+  //////////////////////////////////////////////////////////////////////
 
   acquire(&wait_lock);
 
@@ -446,6 +460,7 @@ scheduler(void)
         // before jumping back to us.
         p->state = RUNNING;
         c->proc = p;
+        p->current_burst = 0;
         swtch(&c->context, &p->context);
 
         // Process is done running for now.
@@ -485,6 +500,12 @@ sched(void)
     panic("sched interruptible");
 
   intena = mycpu()->intena;
+
+  //calculate the burst
+  if(p->avg_burst == 0){
+      p->avg_burst = p->current_burst;}
+  else{
+      p->avg_burst = (p->current_burst + p->avg_burst) / 2;}
   swtch(&p->context, &mycpu()->context);
   mycpu()->intena = intena;
 }
