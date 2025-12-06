@@ -128,6 +128,8 @@ found:
   }else{
     p->priority=1;
   }
+  p->ctime = ticks;
+  p->rtime = 0;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
     freeproc(p);
@@ -347,7 +349,19 @@ kexit(int status)
   iput(p->cwd);
   end_op();
   p->cwd = 0;
-
+  //benchmark-----------------------
+  int tat = ticks - p->ctime;
+  int wait_time = tat - p->rtime;
+  
+  if (p->pid > 2) { 
+      printf("PID %d | PRI: %d | Burst: %d | TAT: %d | Wait: %d\n", 
+             p->pid, 
+             p->priority,
+             p->rtime, 
+             tat, 
+             wait_time);
+  }
+  //////////////////////////////////
   acquire(&wait_lock);
 
   // Give any children to init.
