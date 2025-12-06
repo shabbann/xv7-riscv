@@ -348,11 +348,9 @@ kexit(int status)
   //BENCHMARK--------------------
   int tat = ticks - p->ctime;
   int wait_time = tat - p->rtime;
-  int pri=0;
   if (p->pid > 2) { 
-      printf("PID %d | Algo: %d | Burst: %d | TAT: %d | Wait: %d\n", 
+      printf("PID %d | Algo: FCFS | Burst: %d | TAT: %d | Wait: %d\n", 
              p->pid, 
-             pri,
              p->rtime, 
              tat, 
              wait_time);
