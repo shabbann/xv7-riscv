@@ -124,6 +124,8 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
+  p->ctime=ticks;
+  p->rtime=0;
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
@@ -344,6 +346,16 @@ kexit(int status)
   iput(p->cwd);
   end_op();
   p->cwd = 0;
+  ///////////////
+  int tat = ticks - p->ctime;
+  int wait_time = tat - p->rtime;
+  
+  ///
+  if (p->pid > 2) { 
+      printf("PID %d | Algo: RR  | Burst: %d | TAT: %d | Wait: %d\n", 
+             p->pid, p->rtime, tat, wait_time);
+  }
+  ////
 
   acquire(&wait_lock);
 
