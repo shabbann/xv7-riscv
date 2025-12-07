@@ -145,6 +145,7 @@ UPROGS=\
 	$U/_dorphan\
 	$U/_spin\
 	$U/_priority_test\
+	$U/_benchmark\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
