@@ -125,7 +125,9 @@ found:
   p->pid = allocpid();
   p->state = USED;
   p->ctime = ticks;
+  p->tick_start=0;
   p->rtime = 0;
+  p->avg_burst = 0;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
     freeproc(p);
@@ -454,10 +456,10 @@ scheduler(void)
 
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
-
+      
       if(p->state == RUNNABLE) {
         if(shortest_p == 0 || p->avg_burst < shortest_p->avg_burst) {
-          
+     
           if(shortest_p != 0){
             release(&shortest_p->lock);
           }
@@ -471,9 +473,7 @@ scheduler(void)
     // Run the winner
     if(shortest_p != 0) {
       p = shortest_p;
-      
-      p->current_burst = 0; 
-
+      p->tick_start = p->rtime;
       p->state = RUNNING;
       c->proc = p;
       swtch(&c->context, &p->context);
@@ -513,11 +513,18 @@ sched(void)
 
   intena = mycpu()->intena;
 
-  //calculate the burst
-  if(p->avg_burst == 0){
-      p->avg_burst = p->current_burst;}
-  else{
-      p->avg_burst = (p->current_burst + p->avg_burst) / 2;}
+//calculate the burst
+uint64 burst = p->rtime - p->tick_start;
+
+  if(p->avg_burst == 0)
+      p->avg_burst = burst;
+  else
+      p->avg_burst = (burst + p->avg_burst) / 2;
+
+  // ensure tiny bursts (1 tick) don't round down to 0
+  if(p->avg_burst == 0) 
+      p->avg_burst = 1;
+  // ----------------------
   swtch(&p->context, &mycpu()->context);
   mycpu()->intena = intena;
 }
