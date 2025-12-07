@@ -346,13 +346,12 @@ kexit(int status)
   end_op();
   p->cwd = 0;
   //BENCHMARKING-----------------
-uint64 tat = ticks - p->ctime;
-  uint64 wait_time = tat - p->rtime;
+int tat = ticks - p->ctime;
+  int wait_time = tat - p->rtime;
   
   if (p->pid > 2) { 
-      printf("PID %d | Algo: %d | Burst: %d | TAT: %d | Wait: %d\n", 
+      printf("PID %d | Algo: SJF | Burst: %lu | TAT: %d | Wait: %d\n", 
              p->pid, 
-             p->priority, // or 0 if on FCFS branch
              p->rtime, 
              tat, 
              wait_time);
@@ -451,29 +450,42 @@ scheduler(void)
     intr_on();
     intr_off();
 
-    int found = 0;
+   struct proc *shortest_p = 0;
+
     for(p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
-      if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
-        p->state = RUNNING;
-        c->proc = p;
-        p->current_burst = 0;
-        swtch(&c->context, &p->context);
 
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
-        found = 1;
+      if(p->state == RUNNABLE) {
+        if(shortest_p == 0 || p->avg_burst < shortest_p->avg_burst) {
+          
+          if(shortest_p != 0){
+            release(&shortest_p->lock);
+          }
+          shortest_p = p;
+          continue; // Keep lock held
+        }
       }
       release(&p->lock);
     }
-    if(found == 0) {
+
+    // Run the winner
+    if(shortest_p != 0) {
+      p = shortest_p;
+      
+      p->current_burst = 0; 
+
+      p->state = RUNNING;
+      c->proc = p;
+      swtch(&c->context, &p->context);
+      
+      c->proc = 0;
+      release(&p->lock);
+    }    
+    else{
       // nothing to run; stop running on this core until an interrupt.
       asm volatile("wfi");
     }
+  
   }
 }
 

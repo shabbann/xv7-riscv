@@ -93,8 +93,8 @@ struct proc {
   int pid;                     // Process ID
   uint avg_burst;
   uint current_burst;
-  uint64 ctime;    // Creation Time
-  uint64 rtime;    // Run Time
+  uint64 ctime;   
+  uint64 rtime;  
 
   // wait_lock must be held when using this:
   struct proc *parent;         // Parent process

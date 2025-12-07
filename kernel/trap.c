@@ -155,8 +155,8 @@ kerneltrap()
 
   // give up the CPU if this is a timer interrupt.
   if(which_dev == 2 && myproc() != 0){
-    p->rtime++;
-    p->current_burst++;
+    myproc()->rtime++;
+    myproc()->current_burst++;
     //yield();
   }
   // the yield() may have caused some traps to occur,
