@@ -22,6 +22,11 @@ void child_task(int p_in, int p_out, int burst, char *name) {
 
     // 4. RACE: We woke up!
     printf("%s (PID %d) Woke up! Executing...\n", name, pid);
+    :ِ
+    :ش
+    :
+    :q
+    :q
     burn_cpu(10); 
     printf("%s (PID %d) FINISHED\n", name, pid);
     exit(0);
